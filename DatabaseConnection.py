@@ -29,16 +29,17 @@ def Test_connection():
             cursor.close()
             connection.close()
             print("MySQL connection is closed")
-def Create_Countris_Table():
+def Create_Countries_Table():
     try:
         connection = mysql.connector.connect(host='localhost',
                                              database='CountriesPopulation',
                                              user='root',
                                              password='1234')
+
         mySql_create_query = """CREATE TABLE IF NOT EXISTS Countries (
                                 code VARCHAR(5),
                                 country VARCHAR(255),
-                                iso3 VARCHAR(5),
+                                iso3 VARCHAR(5)
                                 )"""
 
         cursor = connection.cursor()
@@ -63,7 +64,7 @@ def Create_Population_Table():
         mySql_create_query = """CREATE TABLE IF NOT EXISTS Population (
                                 code VARCHAR(5),
                                 value VARCHAR(40),
-                                year INT,
+                                year INT
                                 )"""
 
         cursor = connection.cursor()
@@ -202,3 +203,33 @@ def Sync_all_data(data):
 
     Sync_Countries(Countries_data)
     Sync_Population(Population_data)
+
+
+def get_country_population(countryname):
+    countryname=(countryname['countryname'],)
+    print(countryname)
+    try:
+        connection = mysql.connector.connect(host='localhost',
+                                             database='CountriesPopulation',
+                                             user='root',
+                                             password='1234')
+        mySql_create_query = """SELECT Countries.country , Population.year ,Population.value 
+                             from Countries
+                             left join Population 
+                             on Countries.code = Population.code 
+                             where country = %s"""
+
+
+        cursor = connection.cursor()
+        cursor.execute(mySql_create_query,countryname)
+        myresult = cursor.fetchall()
+        cursor.close()
+        return myresult
+
+    except mysql.connector.Error as error:
+        print("Failed to retrive the data {}".format(error))
+
+    finally:
+        if connection.is_connected():
+            connection.close()
+            print("MySQL connection is closed")

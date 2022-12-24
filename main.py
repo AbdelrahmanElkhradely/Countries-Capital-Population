@@ -19,14 +19,14 @@ def delete_all_countries():
 
 @app.route("/createcountrytable")
 def Create_Country_Table():
-    DatabaseConnection.Create_Countris_Table()
+    DatabaseConnection.Create_Countries_Table()
     return {"message": "Accepted"}, 202
 @app.route("/createpopulationtable")
 def Create_Population_Table():
     DatabaseConnection.Create_Population_Table()
     return {"message": "Accepted"}, 202
 
-@app.route("/syncCountries")
+@app.route("/syncdata")
 def update_all_data():
     url = "https://countriesnow.space/api/v0.1/countries/population"
     payload = {}
@@ -43,36 +43,22 @@ def update_all_data():
     return {"message": "Accepted"}, 202
 
 
-# @app.route("/pokemon")
-# def get_pokemon():
-#     # params={'limit' : '100000',  'offset':'0'}
-#     limit = request.args.get('limit')
-#     offset = request.args.get('offset')
-#     params={'limit' : limit,  'offset':offset}
-#     url = "https://pokeapi.co/api/v2/pokemon"
-#     response = requests.get(url,params=params)
-#     data = response.json()
-#     print (data['count'])
-#     return {"pokemon": data}
-#
-# @app.route("/movie")
-# def get_movie():
-#     url = "https://api.themoviedb.org/3/movie/popular?api_key=18a017b1725a276ac9a9838ec5345147"
-#
-#     response = urllib.request.urlopen(url)
-#     data = response.read()
-#     jsondata = json.loads(data)
-#
-#     movie_json = []
-#
-#     for movie in jsondata["results"]:
-#         movie = {
-#             "title": movie["title"],
-#             "overview": movie["overview"],
-#         }
-#
-#         movie_json.append(movie)
-#     return {"movie title": movie_json}
+@app.route("/getcountrypopulation")
+def get_country_population():
+    # params={'limit' : '100000',  'offset':'0'}
+    countryname = request.args.get('countryname')
+    # offset = request.args.get('offset')
+    params={'countryname' : countryname}
+    response=DatabaseConnection.get_country_population(params)
+    data=[]
+    for x in response:
+        dict={'1-country name':x[0],'2-year':x[1], '3-Population number':x[2]}
+        data.append(dict)
+    # data = data.json()
+    # return {"message": "Accepted"}, 202
+    # # print(data)
+    return data
+
 
 
 if __name__ == '__main__':
