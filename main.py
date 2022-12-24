@@ -1,11 +1,13 @@
 from flask_restful import Resource, Api, reqparse
 from flask import Flask,request
-import urllib.request, json
 import requests
+
 import DatabaseConnection
+import threading
+
 app = Flask(__name__)
 api = Api(app)
-import threading
+
 
 @app.route("/deleteallpopulation")
 def delete_all_population():
@@ -42,12 +44,9 @@ def update_all_data():
     thread.start()
     return {"message": "Accepted"}, 202
 
-
 @app.route("/getcountrypopulation")
 def get_country_population():
-    # params={'limit' : '100000',  'offset':'0'}
     countryname = request.args.get('countryname')
-    # offset = request.args.get('offset')
     params={'countryname' : countryname}
     response=DatabaseConnection.get_country_population(params)
     data=[]
@@ -59,6 +58,20 @@ def get_country_population():
     # # print(data)
     return data
 
+@app.route("/getallcountriespopulation")
+def get_all_country_population():
+
+    pagenumber = request.args.get('pagenumber')
+    params={'pagenumber' : pagenumber}
+    response=DatabaseConnection.get_all_country_population(params)
+    data=[]
+    for x in response:
+        dict={'1-country name':x[0],'2-year':x[1], '3-Population number':x[2]}
+        data.append(dict)
+    # data = data.json()
+    # return {"message": "Accepted"}, 202
+    # # print(data)
+    return data
 
 
 if __name__ == '__main__':

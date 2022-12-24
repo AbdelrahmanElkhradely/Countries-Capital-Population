@@ -37,9 +37,11 @@ def Create_Countries_Table():
                                              password='1234')
 
         mySql_create_query = """CREATE TABLE IF NOT EXISTS Countries (
+                                ID SERIAL PRIMARY KEY,
                                 code VARCHAR(5),
                                 country VARCHAR(255),
                                 iso3 VARCHAR(5)
+                                
                                 )"""
 
         cursor = connection.cursor()
@@ -62,6 +64,7 @@ def Create_Population_Table():
                                              user='root',
                                              password='1234')
         mySql_create_query = """CREATE TABLE IF NOT EXISTS Population (
+                                ID SERIAL PRIMARY KEY,
                                 code VARCHAR(5),
                                 value VARCHAR(40),
                                 year INT
@@ -204,7 +207,6 @@ def Sync_all_data(data):
     Sync_Countries(Countries_data)
     Sync_Population(Population_data)
 
-
 def get_country_population(countryname):
     countryname=(countryname['countryname'],)
     print(countryname)
@@ -233,3 +235,36 @@ def get_country_population(countryname):
         if connection.is_connected():
             connection.close()
             print("MySQL connection is closed")
+
+def get_all_country_population(pagenumber):
+    pagenumber=int(pagenumber['pagenumber'])
+    offset=(pagenumber-1)*50
+    print(pagenumber)
+    try:
+        connection = mysql.connector.connect(host='localhost',
+                                             database='CountriesPopulation',
+                                             user='root',
+                                             password='1234')
+        mySql_create_query = """SELECT Countries.country , Population.year ,Population.value 
+                             from Countries
+                             left join Population 
+                             on Countries.code = Population.code 
+                             LIMIT 50
+                             OFFSET %s"""
+
+
+        cursor = connection.cursor()
+        cursor.execute(mySql_create_query,(offset,))
+        myresult = cursor.fetchall()
+        cursor.close()
+        return myresult
+
+    except mysql.connector.Error as error:
+        print("Failed to retrive the data {}".format(error))
+
+    finally:
+        if connection.is_connected():
+            connection.close()
+            print("MySQL connection is closed")
+
+
